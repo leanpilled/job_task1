@@ -1,0 +1,24 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: >
+      sh -c "python3 manage.py migrate &&
+              python3 manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/django_task
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    links:
+      - redis
+  redis:
+    image: redis
+  celery:
+    build: .
+    command: celery -A storage worker --loglevel=info
+    volumes:
+      - .:/django_task
+    depends_on:
+      - web
